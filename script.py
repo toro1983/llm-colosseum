@@ -15,12 +15,15 @@ def main():
     game = Game(
         render=True,
         player_1=Player1(
-            nickname="Daddy",
-            model="ollama:llama3",
+            nickname="Player 1",
+            #model="openai:gpt-3.5-turbo-0125",
+            model="maru:maru-red",
         ),
+        #player_1=None,
         player_2=Player2(
-            nickname="Baby",
-            model="anthropic:claude-3-haiku-20240307",
+            nickname="PLayer 2",
+            #model="openai:gpt-3.5-turbo-0125",
+            model="maru:maru-red",
         ),
     )
     return game.run()

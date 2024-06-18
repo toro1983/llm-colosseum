@@ -28,3 +28,9 @@ def get_client(model_str):
         from llama_index.llms.ollama import Ollama
 
         return Ollama(model=model_name)
+
+    elif provider == "maru":
+        from .maru_client import Maru
+
+        return Maru(model=model_name)
+

@@ -1,3 +1,4 @@
+import json
 import os
 import random
 import re
@@ -284,10 +285,10 @@ To increase your score, move toward the opponent and attack the opponent. To pre
         valid_moves = []
 
         # If we are in the test environment, we don't want to call the LLM
-        if os.getenv("DISABLE_LLM", "False") == "True":
+        if (os.getenv("DISABLE_LLM", "False") == "True") | (self.model == "random"):
             # Choose a random int from the list of moves
             logger.debug("DISABLE_LLM is True, returning a random move")
-            return [random.choice(list(MOVES.values()))]
+            return [random.choice(list(META_INSTRUCTIONS.keys()))]
 
         while len(valid_moves) == 0:
             llm_stream = self.call_llm()
@@ -298,9 +299,9 @@ To increase your score, move toward the opponent and attack the opponent. To pre
             llm_response = ""
 
             for r in llm_stream:
-                print(r.delta, end="")
+                #print(r.delta, end="")
                 llm_response += r.delta
-
+                #logger.debug(f"llm_response: {llm_response}")
                 # The response is a bullet point list of moves. Use regex
                 matches = re.findall(r"- ([\w ]+)", llm_response)
                 moves = ["".join(match) for match in matches]
@@ -362,11 +363,24 @@ Example if the opponent is far:
 
         client = get_client(self.model)
 
-        messages = [
-            ChatMessage(role="system", content=system_prompt),
-            ChatMessage(role="user", content="Your next moves are:"),
-        ]
-        resp = client.stream_chat(messages)
+        if "maru" in self.model :
+            messages = [
+                {
+                    "role": "system",
+                    "content": system_prompt
+                },
+                {
+                    "role": "user",
+                    "content": "Your next moves are:"
+                }
+            ]
+            resp = client.get_LLM_result(messages)
+        else:
+            messages = [
+                ChatMessage(role="system", content=system_prompt),
+                ChatMessage(role="user", content="Your next moves are:"),
+            ]
+            resp = client.stream_chat(messages)
 
         logger.debug(f"LLM call to {self.model}: {system_prompt}")
         logger.debug(f"LLM call to {self.model}: {time.time() - start_time}s")
